@@ -213,9 +213,9 @@ where
 
     #[inline]
     fn send_wrapper(&mut self, byte: u8) -> Result<(), Error<SpiE, PinE>> {
-        self.cs.set_low().map_err(|e| Error::Pin(e))?;
-        nb::block!(self.spi.send(byte)).map_err(|e| Error::Spi(e))?;
-        self.cs.set_high().map_err(|e| Error::Pin(e))?;
+        self.cs.set_low().map_err(Error::Pin)?;
+        nb::block!(self.spi.send(byte)).map_err(Error::Spi)?;
+        self.cs.set_high().map_err(Error::Pin)?;
         Ok(())
     }
 
@@ -276,8 +276,7 @@ where
         if self.pending_op != PendingOp::None {
             return Err(Error::Adc(AdcError::PendingOperation));
         }
-        let conv_byte =
-            Self::get_conversion_byte(scan_mode, channel_num).map_err(|e| Error::Adc(e))?;
+        let conv_byte = Self::get_conversion_byte(scan_mode, channel_num).map_err(Error::Adc)?;
         self.send_wrapper(conv_byte)?;
         self.pending_op = op_type;
         Ok(())
@@ -317,9 +316,9 @@ where
         };
         if is_low {
             let mut dummy_cmd: [u8; 2] = [0; 2];
-            self.cs.set_low().map_err(|e| Error::Pin(e))?;
-            let transfer_result =  self.spi.transfer(&mut dummy_cmd);
-            self.cs.set_high().map_err(|e| Error::Pin(e))?;
+            self.cs.set_low().map_err(Error::Pin)?;
+            let transfer_result = self.spi.transfer(&mut dummy_cmd);
+            self.cs.set_high().map_err(Error::Pin)?;
             match transfer_result {
                 Ok(reply) => {
                     self.pending_op = PendingOp::None;
@@ -356,9 +355,9 @@ where
         };
         buf[1] = 0x00;
         buf[2] = 0x00;
-        self.cs.set_low().map_err(|e| Error::Pin(e))?;
+        self.cs.set_low().map_err(Error::Pin)?;
         let reply = self.spi.transfer(&mut buf[0..3]).ok().unwrap();
-        self.cs.set_high().map_err(|e| Error::Pin(e))?;
+        self.cs.set_high().map_err(Error::Pin)?;
         Ok(((reply[1] as u16) << 6) | (reply[2] as u16 >> 2))
     }
 
@@ -378,12 +377,12 @@ where
         }
         next_byte = iter.next().ok_or(Error::Adc(AdcError::CmdBufTooSmall))?;
         *next_byte = 0x00;
-        self.cs.set_low().map_err(|e| Error::Pin(e))?;
+        self.cs.set_low().map_err(Error::Pin)?;
         let reply = self
             .spi
             .transfer(&mut buf[0..((n + 1) * 2 + 1) as usize])
-            .map_err(|e| Error::Spi(e))?;
-        self.cs.set_high().map_err(|e| Error::Pin(e))?;
+            .map_err(Error::Spi)?;
+        self.cs.set_high().map_err(Error::Pin)?;
         let mut reply_iter = reply.iter();
         // Skip first reply byte
         reply_iter.next().unwrap();
@@ -417,12 +416,12 @@ where
         }
         next_byte = iter.next().ok_or(Error::Adc(AdcError::CmdBufTooSmall))?;
         *next_byte = 0x00;
-        self.cs.set_low().map_err(|e| Error::Pin(e))?;
+        self.cs.set_low().map_err(Error::Pin)?;
         let reply = self
             .spi
             .transfer(&mut buf[0..(conversions * 2 + 1) as usize])
-            .map_err(|e| Error::Spi(e))?;
-        self.cs.set_high().map_err(|e| Error::Pin(e))?;
+            .map_err(Error::Spi)?;
+        self.cs.set_high().map_err(Error::Pin)?;
         let mut reply_iter = reply.iter();
         // Skip first reply byte
         reply_iter.next().unwrap();
