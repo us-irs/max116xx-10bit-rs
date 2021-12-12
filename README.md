@@ -18,7 +18,7 @@ functionality is still limited. Pull requests to improve this are welcome.
 To use this driver, import this crate and an `embedded-hal` implementation and then instantiate
 the appropriate device.
 
-The crate uses basic type-level support to prevent using the ADC in a wrong way.https://github.com/rust-embedded/embedded-hal
+The crate uses basic type-level support to prevent using the ADC in a wrong way.
 The type-level support defaults to an externally clocked device with no wake-up delay.
 
 This crate was tested using the Vorago REB1 development board. You can find an example application
