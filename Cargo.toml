@@ -1,8 +1,16 @@
 [package]
 name = "max116xx-10bit"
 version = "0.1.0"
+authors = ["Robin Mueller <muellerr@irs.uni-stuttgart.de>"]
 edition = "2021"
-
+description = "Driver crate for the MAX116xx 10-bit ADC devices"
+homepage = "https://egit.irs.uni-stuttgart.de/rust/max116xx-10bit"
+repository = "https://egit.irs.uni-stuttgart.de/rust/max116xx-10bit"
+license = "Apache-2.0"
+keywords = ["maxim", "adc", "sensor", "embedded", "no-std"]
+categories = ["embedded", "no-std", "hardware-support"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+embedded-hal = "0.2.6"
+nb = "1.0.0"
