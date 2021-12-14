@@ -1,3 +1,7 @@
+[![Crates.io](https://img.shields.io/crates/v/max116xx-10bit)](https://crates.io/crates/max116xx-10bit)
+[![build](https://github.com/us-irs/max116xx-10bit-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/us-irs/max116xx-10bit-rs/actions/workflows/ci.yml)
+[![docs.rs](https://img.shields.io/docsrs/max116xx-10bit)](https://docs.rs/max116xx-10bit)
+
 Rust Maxim 116xx 10-bit ADC device driver crate
 ========
 
@@ -22,4 +26,5 @@ The crate uses basic type-level support to prevent using the ADC in a wrong way.
 The type-level support defaults to an externally clocked device with no wake-up delay.
 
 This crate was tested using the Vorago REB1 development board. You can find an example application
-[here](https://egit.irs.uni-stuttgart.de/rust/vorago-reb1).
+[here](https://egit.irs.uni-stuttgart.de/rust/vorago-reb1/src/branch/main/src/max11619.rs)
+and [here](https://egit.irs.uni-stuttgart.de/rust/vorago-reb1/src/branch/main/examples/max11619-adc.rs).

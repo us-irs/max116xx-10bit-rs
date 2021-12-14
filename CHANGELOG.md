@@ -22,6 +22,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Improved documentation
 - Made library easier to use
 
+## [v0.1.1]
+
+- Added badges and some documentation and README tweaks
+
 ## [v0.1.0]
 
 - Initial release

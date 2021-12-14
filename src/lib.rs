@@ -15,6 +15,11 @@
 //!  - [`Max116xx10Bit::into_ext_clkd_with_int_ref_wakeup_delay`]
 //!  - [`Max116xx10Bit::into_int_clkd_int_timed_through_ser_if_with_wakeup`]
 //!  - [`Max116xx10Bit::into_int_clkd_int_timed_through_ser_if_without_wakeup`]
+//!
+//! ## Examples
+//!
+//! You can find an example application [here](https://egit.irs.uni-stuttgart.de/rust/vorago-reb1/src/branch/main/examples/max11619-adc.rs)
+//! using a [thin abstraction layer](https://egit.irs.uni-stuttgart.de/rust/vorago-reb1/src/branch/main/src/max11619.rs)
 #![no_std]
 use core::{marker::PhantomData, slice::IterMut};
 use embedded_hal::{
