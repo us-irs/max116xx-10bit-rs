@@ -1,6 +1,6 @@
 [package]
 name = "max116xx-10bit"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Robin Mueller <muellerr@irs.uni-stuttgart.de>"]
 edition = "2021"
 description = "Driver crate for the MAX116xx 10-bit ADC devices"
