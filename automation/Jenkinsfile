@@ -36,17 +36,5 @@ pipeline {
                 sh 'cargo check --target armv7-unknown-linux-gnueabihf'
             }
         }
-        stage('Check Examples') {
-            agent {
-                dockerfile {
-                    dir 'automation'
-                    reuseNode true
-                }
-            }
-            steps {
-                sh 'cargo check --target thumbv6m-none-eabi --examples'
-                sh 'cargo check --target armv7-unknown-linux-gnueabihf'
-            }
-        }
     }
 }
