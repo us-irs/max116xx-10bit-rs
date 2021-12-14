@@ -4,7 +4,7 @@
 //!
 //! You can create an initial ADC struct by using the [`Max116xx10Bit::max11618`],
 //! [`Max116xx10Bit::max11619`], [`Max116xx10Bit::max11620`], [`Max116xx10Bit::max11621`],
-//! [`Max116xx10Bit::max11624`] and [`Max116xx10Bit::max11625`] functionsdepending on which device
+//! [`Max116xx10Bit::max11624`] and [`Max116xx10Bit::max11625`] functions depending on which device
 //! you are using. This automatically sets the highest channel number accordingly.
 //!
 //! The default structs use the externally clocked mode with an external voltage reference.
