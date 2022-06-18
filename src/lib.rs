@@ -837,12 +837,12 @@ where
         if self.eoc.is_low().map_err(Error::Pin)? {
             // maximum length of reply is 32 for 16 channels
             let mut dummy_cmd: [u8; 32] = [0; 32];
-            let num_conv: usize;
-            if self.base.cfg.pending_scan_mode == Some(ScanMode::ScanChannelNRepeatedly) {
-                num_conv = self.base.cfg.results_len as usize;
-            } else {
-                num_conv = self.base.cfg.requested_conversions;
-            }
+            let num_conv: usize =
+                if self.base.cfg.pending_scan_mode == Some(ScanMode::ScanChannelNRepeatedly) {
+                    self.base.cfg.results_len as usize
+                } else {
+                    self.base.cfg.requested_conversions
+                };
             self.base.cfg.pending_scan_mode = None;
             self.base.cfg.requested_conversions = 0;
             self.base.cs.set_low().map_err(Error::Pin)?;
