@@ -132,7 +132,7 @@ type ExtClkd = ExternallyClocked;
 //==================================================================================================
 
 /// Clock modes for the MAX116XX devices
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum ClockMode {
     /// Internally timed, CNVST only needs to be pulsed for 40ns.
     /// CNVST Configuration: CNVST active low
@@ -148,7 +148,7 @@ pub enum ClockMode {
 }
 
 /// Voltage reference modes
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum VoltageRefMode {
     /// Auto-Shutdown is on, wake-up delay of 65 us
     InternalRefWithWakeupDelay = 0b00,
@@ -167,7 +167,7 @@ pub enum AveragingConversions {
 }
 
 /// Specifies the number of returned result in single scan mode
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum AveragingResults {
     FourResults = 0b00,
     EightResults = 0b01,
@@ -175,7 +175,7 @@ pub enum AveragingResults {
     SixteenResults = 0b11,
 }
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum ScanMode {
     Scan0ToChannelN = 0b00,
     ScanChannelNToHighest = 0b01,
