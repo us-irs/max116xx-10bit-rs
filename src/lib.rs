@@ -21,6 +21,7 @@
 //! You can find an example application [here](https://egit.irs.uni-stuttgart.de/rust/vorago-reb1/src/branch/main/examples/max11619-adc.rs)
 //! using a [thin abstraction layer](https://egit.irs.uni-stuttgart.de/rust/vorago-reb1/src/branch/main/src/max11619.rs)
 #![no_std]
+use core::convert::Infallible;
 use core::{marker::PhantomData, slice::IterMut};
 use embedded_hal::delay::DelayNs;
 use embedded_hal::digital::{InputPin, OutputPin};
@@ -226,21 +227,20 @@ struct InternalCfg {
 // ADC implementation
 //==================================================================================================
 
-pub struct Max116xx10Bit<Spi, Cs, Clocked = ExtClkd, Wakeup = WithoutWakeupDelay> {
+pub struct Max116xx10Bit<Spi, Clocked = ExtClkd, Wakeup = WithoutWakeupDelay> {
     spi: Spi,
-    cs: Cs,
     cfg: InternalCfg,
     clocked: PhantomData<Clocked>,
     delay: PhantomData<Wakeup>,
 }
 
-pub struct Max116xx10BitEocExt<SPI, CS, EOC, CLOCKED> {
-    base: Max116xx10Bit<SPI, CS, CLOCKED, WithoutWakeupDelay>,
+pub struct Max116xx10BitEocExt<SPI, EOC, CLOCKED> {
+    base: Max116xx10Bit<SPI, CLOCKED, WithoutWakeupDelay>,
     eoc: EOC,
 }
 
-pub struct Max116xx10BitCnvstEocExt<SPI, CS, EOC, CNVST, CLOCKED, WAKEUP = WithoutWakeupDelay> {
-    base: Max116xx10Bit<SPI, CS, CLOCKED, WAKEUP>,
+pub struct Max116xx10BitCnvstEocExt<SPI, EOC, CNVST, CLOCKED, WAKEUP = WithoutWakeupDelay> {
+    base: Max116xx10Bit<SPI, CLOCKED, WAKEUP>,
     eoc: EOC,
     cnvst: CNVST,
 }
@@ -249,24 +249,24 @@ pub struct Max116xx10BitCnvstEocExt<SPI, CS, EOC, CNVST, CLOCKED, WAKEUP = Witho
 // Generic
 //==================================================================================================
 
-impl<Cs: OutputPin, Spi: SpiDevice> Max116xx10Bit<Spi, Cs, ExtClkd, WithoutWakeupDelay> {
-    pub fn max11618(spi: Spi, cs: Cs) -> Result<Self, Error<Spi::Error, Cs::Error>> {
-        Self::new::<Max11618>(spi, cs)
+impl<Spi: SpiDevice> Max116xx10Bit<Spi, ExtClkd, WithoutWakeupDelay> {
+    pub fn max11618(spi: Spi) -> Result<Self, Error<Spi::Error, Infallible>> {
+        Self::new::<Max11618>(spi)
     }
-    pub fn max11619(spi: Spi, cs: Cs) -> Result<Self, Error<Spi::Error, Cs::Error>> {
-        Self::new::<Max11619>(spi, cs)
+    pub fn max11619(spi: Spi) -> Result<Self, Error<Spi::Error, Infallible>> {
+        Self::new::<Max11619>(spi)
     }
-    pub fn max11620(spi: Spi, cs: Cs) -> Result<Self, Error<Spi::Error, Cs::Error>> {
-        Self::new::<Max11620>(spi, cs)
+    pub fn max11620(spi: Spi) -> Result<Self, Error<Spi::Error, Infallible>> {
+        Self::new::<Max11620>(spi)
     }
-    pub fn max11621(spi: Spi, cs: Cs) -> Result<Self, Error<Spi::Error, Cs::Error>> {
-        Self::new::<Max11621>(spi, cs)
+    pub fn max11621(spi: Spi) -> Result<Self, Error<Spi::Error, Infallible>> {
+        Self::new::<Max11621>(spi)
     }
-    pub fn max11624(spi: Spi, cs: Cs) -> Result<Self, Error<Spi::Error, Cs::Error>> {
-        Self::new::<Max11624>(spi, cs)
+    pub fn max11624(spi: Spi) -> Result<Self, Error<Spi::Error, Infallible>> {
+        Self::new::<Max11624>(spi)
     }
-    pub fn max11625(spi: Spi, cs: Cs) -> Result<Self, Error<Spi::Error, Cs::Error>> {
-        Self::new::<Max11625>(spi, cs)
+    pub fn max11625(spi: Spi) -> Result<Self, Error<Spi::Error, Infallible>> {
+        Self::new::<Max11625>(spi)
     }
 
     /// Create a new generic MAX116xx instance. By default the generated ADC struct is configured
@@ -276,10 +276,9 @@ impl<Cs: OutputPin, Spi: SpiDevice> Max116xx10Bit<Spi, Cs, ExtClkd, WithoutWakeu
     ///
     /// The corresponding SETUP register is `0b0111_0100`
     /// Please note that you still might have to reset and setup the ADC.
-    pub fn new<MAX: HasChannels>(spi: Spi, cs: Cs) -> Result<Self, Error<Spi::Error, Cs::Error>> {
+    pub fn new<MAX: HasChannels>(spi: Spi) -> Result<Self, Error<Spi::Error, Infallible>> {
         let max_dev = Max116xx10Bit {
             spi,
-            cs,
             cfg: InternalCfg {
                 clk_mode: ExtClkd::CLK_SEL,
                 ref_mode: VoltageRefMode::ExternalSingleEndedNoWakeupDelay,
@@ -300,10 +299,9 @@ impl<Cs: OutputPin, Spi: SpiDevice> Max116xx10Bit<Spi, Cs, ExtClkd, WithoutWakeu
     /// The corresponding SETUP register is `0b0111_0000`
     pub fn into_ext_clkd_with_int_ref_wakeup_delay(
         self,
-    ) -> Max116xx10Bit<Spi, Cs, ExtClkd, WithWakeupDelay> {
+    ) -> Max116xx10Bit<Spi, ExtClkd, WithWakeupDelay> {
         Max116xx10Bit {
             spi: self.spi,
-            cs: self.cs,
             cfg: InternalCfg {
                 clk_mode: ExtClkd::CLK_SEL,
                 ref_mode: VoltageRefMode::InternalRefWithWakeupDelay,
@@ -323,10 +321,9 @@ impl<Cs: OutputPin, Spi: SpiDevice> Max116xx10Bit<Spi, Cs, ExtClkd, WithoutWakeu
     /// The corresponding SETUP register is `0b0111_1000`
     pub fn into_ext_clkd_with_int_ref_no_wakeup_delay(
         self,
-    ) -> Max116xx10Bit<Spi, Cs, ExtClkd, WithoutWakeupDelay> {
+    ) -> Max116xx10Bit<Spi, ExtClkd, WithoutWakeupDelay> {
         Max116xx10Bit {
             spi: self.spi,
-            cs: self.cs,
             cfg: InternalCfg {
                 clk_mode: ExtClkd::CLK_SEL,
                 ref_mode: VoltageRefMode::InternalRefWithoutWakeupDelay,
@@ -347,11 +344,10 @@ impl<Cs: OutputPin, Spi: SpiDevice> Max116xx10Bit<Spi, Cs, ExtClkd, WithoutWakeu
     pub fn into_int_clkd_int_timed_through_ser_if_with_wakeup<Eoc: InputPin>(
         self,
         eoc: Eoc,
-    ) -> Max116xx10BitEocExt<Spi, Cs, Eoc, IntClkdIntTmdSerIF> {
+    ) -> Max116xx10BitEocExt<Spi, Eoc, IntClkdIntTmdSerIF> {
         Max116xx10BitEocExt {
             base: Max116xx10Bit {
                 spi: self.spi,
-                cs: self.cs,
                 cfg: InternalCfg {
                     clk_mode: IntClkdIntTmdSerIF::CLK_SEL,
                     ref_mode: VoltageRefMode::InternalRefWithWakeupDelay,
@@ -377,14 +373,13 @@ impl<Cs: OutputPin, Spi: SpiDevice> Max116xx10Bit<Spi, Cs, ExtClkd, WithoutWakeu
         self,
         v_ref: VoltageRefMode,
         eoc: Eoc,
-    ) -> Result<Max116xx10BitEocExt<Spi, Cs, Eoc, IntClkdIntTmdSerIF>, AdcError> {
+    ) -> Result<Max116xx10BitEocExt<Spi, Eoc, IntClkdIntTmdSerIF>, AdcError> {
         if v_ref == VoltageRefMode::InternalRefWithWakeupDelay {
             return Err(AdcError::InvalidRefMode);
         }
         Ok(Max116xx10BitEocExt {
             base: Max116xx10Bit {
                 spi: self.spi,
-                cs: self.cs,
                 cfg: InternalCfg {
                     clk_mode: IntClkdIntTmdSerIF::CLK_SEL,
                     ref_mode: VoltageRefMode::InternalRefWithWakeupDelay,
@@ -401,20 +396,16 @@ impl<Cs: OutputPin, Spi: SpiDevice> Max116xx10Bit<Spi, Cs, ExtClkd, WithoutWakeu
     }
 }
 
-impl<Cs: OutputPin, Spi: SpiDevice, Clocked: ClockedProvider, Wakeup>
-    Max116xx10Bit<Spi, Cs, Clocked, Wakeup>
-{
+impl<Spi: SpiDevice, Clocked: ClockedProvider, Wakeup> Max116xx10Bit<Spi, Clocked, Wakeup> {
     #[inline]
-    fn send_wrapper(&mut self, byte: u8) -> Result<(), Error<Spi::Error, Cs::Error>> {
-        self.cs.set_low().map_err(Error::Pin)?;
+    fn send_wrapper(&mut self, byte: u8) -> Result<(), Error<Spi::Error, Infallible>> {
         self.spi.write(&[byte]).map_err(Error::Spi)?;
-        self.cs.set_high().map_err(Error::Pin)?;
         Ok(())
     }
 
     /// Set up the ADC depending on clock and reference configuration
     #[inline]
-    pub fn setup(&mut self) -> Result<(), Error<Spi::Error, Cs::Error>> {
+    pub fn setup(&mut self) -> Result<(), Error<Spi::Error, Infallible>> {
         self.send_wrapper(self.get_setup_byte())
     }
 
@@ -425,13 +416,13 @@ impl<Cs: OutputPin, Spi: SpiDevice, Clocked: ClockedProvider, Wakeup>
         &mut self,
         avg_conv: AveragingConversions,
         avg_res: AveragingResults,
-    ) -> Result<(), Error<Spi::Error, Cs::Error>> {
+    ) -> Result<(), Error<Spi::Error, Infallible>> {
         self.cfg.results_len = Self::get_results_len(avg_res);
         self.send_wrapper(Self::get_averaging_byte(avg_conv, avg_res))
     }
 
     #[inline]
-    pub fn reset(&mut self, fifo_only: bool) -> Result<(), Error<Spi::Error, Cs::Error>> {
+    pub fn reset(&mut self, fifo_only: bool) -> Result<(), Error<Spi::Error, Infallible>> {
         let mut reset_byte = 0b0001_0000;
         if fifo_only {
             reset_byte |= 1 << 3;
@@ -468,10 +459,10 @@ impl<Cs: OutputPin, Spi: SpiDevice, Clocked: ClockedProvider, Wakeup>
 
     /// Generic function which can be used a single result is available
     /// when EOC is low
-    fn internal_read_single_channel<Eoc: InputPin<Error = Cs::Error>>(
+    fn internal_read_single_channel<Eoc: InputPin>(
         &mut self,
         eoc: &mut Eoc,
-    ) -> nb::Result<u16, Error<Spi::Error, Cs::Error>> {
+    ) -> nb::Result<u16, Error<Spi::Error, Eoc::Error>> {
         if self.cfg.pending_scan_mode.is_none() {
             return Err(nb::Error::Other(Error::Adc(AdcError::NoPendingOperation)));
         } else if self.cfg.pending_scan_mode != Some(ScanMode::ConvertChannelNOnce) {
@@ -479,9 +470,7 @@ impl<Cs: OutputPin, Spi: SpiDevice, Clocked: ClockedProvider, Wakeup>
         }
         if eoc.is_low().map_err(Error::Pin)? {
             let mut reply_buf: [u8; 2] = [0; 2];
-            self.cs.set_low().map_err(Error::Pin)?;
             let transfer_result = self.spi.read(&mut reply_buf);
-            self.cs.set_high().map_err(Error::Pin)?;
             match transfer_result {
                 Ok(_) => {
                     self.cfg.pending_scan_mode = None;
@@ -499,7 +488,7 @@ macro_rules! ext_impl {
     () => {
         /// Set up the ADC depending on clock and reference configuration
         #[inline]
-        pub fn setup(&mut self) -> Result<(), Error<Spi::Error, Cs::Error>> {
+        pub fn setup(&mut self) -> Result<(), Error<Spi::Error, Infallible>> {
             self.base.send_wrapper(self.base.get_setup_byte())
         }
 
@@ -510,16 +499,16 @@ macro_rules! ext_impl {
             &mut self,
             avg_conv: AveragingConversions,
             avg_res: AveragingResults,
-        ) -> Result<(), Error<Spi::Error, Cs::Error>> {
-            self.base.cfg.results_len = Max116xx10Bit::<Spi, Cs, Clocked>::get_results_len(avg_res);
+        ) -> Result<(), Error<Spi::Error, Infallible>> {
+            self.base.cfg.results_len = Max116xx10Bit::<Spi, Clocked>::get_results_len(avg_res);
             self.base
-                .send_wrapper(Max116xx10Bit::<Spi, Cs, Clocked>::get_averaging_byte(
+                .send_wrapper(Max116xx10Bit::<Spi, Clocked>::get_averaging_byte(
                     avg_conv, avg_res,
                 ))
         }
 
         #[inline]
-        pub fn reset(&mut self, fifo_only: bool) -> Result<(), Error<Spi::Error, Cs::Error>> {
+        pub fn reset(&mut self, fifo_only: bool) -> Result<(), Error<Spi::Error, Infallible>> {
             let mut reset_byte = 0b0001_0000;
             if fifo_only {
                 reset_byte |= 1 << 3;
@@ -528,14 +517,12 @@ macro_rules! ext_impl {
         }
     };
 }
-impl<Cs: OutputPin, Spi: SpiDevice, Eoc, Clocked: ClockedProvider>
-    Max116xx10BitEocExt<Spi, Cs, Eoc, Clocked>
-{
+impl<Spi: SpiDevice, Eoc, Clocked: ClockedProvider> Max116xx10BitEocExt<Spi, Eoc, Clocked> {
     ext_impl!();
 }
 
-impl<Cs: OutputPin, Spi: SpiDevice, EOC, CNVST, Clocked: ClockedProvider, DELAY>
-    Max116xx10BitCnvstEocExt<Spi, Cs, EOC, CNVST, Clocked, DELAY>
+impl<Spi: SpiDevice, EOC, CNVST, Clocked: ClockedProvider, DELAY>
+    Max116xx10BitCnvstEocExt<Spi, EOC, CNVST, Clocked, DELAY>
 {
     ext_impl!();
 }
@@ -545,21 +532,19 @@ impl<Cs: OutputPin, Spi: SpiDevice, EOC, CNVST, Clocked: ClockedProvider, DELAY>
 //==================================================================================================
 
 /// Implementations when using the external SPI clock to time the conversions
-impl<Spi: SpiDevice, Cs: OutputPin> Max116xx10Bit<Spi, Cs, ExtClkd, WithoutWakeupDelay> {
+impl<Spi: SpiDevice> Max116xx10Bit<Spi, ExtClkd, WithoutWakeupDelay> {
     pub fn read_single_channel(
         &mut self,
         buf: &mut [u8],
         channel_num: u8,
-    ) -> Result<u16, Error<Spi::Error, Cs::Error>> {
+    ) -> Result<u16, Error<Spi::Error, Infallible>> {
         if buf.len() < 3 {
             return Err(Error::Adc(AdcError::CmdBufTooSmall));
         }
         buf[0] = self.get_conversion_byte(ScanMode::ConvertChannelNOnce, channel_num)?;
         buf[1] = 0x00;
         buf[2] = 0x00;
-        self.cs.set_low().map_err(Error::Pin)?;
         self.spi.transfer_in_place(&mut buf[0..3]).ok().unwrap();
-        self.cs.set_high().map_err(Error::Pin)?;
         Ok(((buf[1] as u16) << 6) | (buf[2] as u16 >> 2))
     }
 
@@ -568,7 +553,7 @@ impl<Spi: SpiDevice, Cs: OutputPin> Max116xx10Bit<Spi, Cs, ExtClkd, WithoutWakeu
         buf: &mut [u8],
         result_iter: &mut IterMut<u16>,
         n: u8,
-    ) -> Result<(), Error<Spi::Error, Cs::Error>> {
+    ) -> Result<(), Error<Spi::Error, Infallible>> {
         let mut iter = buf.iter_mut();
         let mut next_byte: &mut u8;
         for idx in 0..n + 1 {
@@ -579,11 +564,9 @@ impl<Spi: SpiDevice, Cs: OutputPin> Max116xx10Bit<Spi, Cs, ExtClkd, WithoutWakeu
         }
         next_byte = iter.next().ok_or(Error::Adc(AdcError::CmdBufTooSmall))?;
         *next_byte = 0x00;
-        self.cs.set_low().map_err(Error::Pin)?;
         self.spi
             .transfer_in_place(&mut buf[0..((n + 1) * 2 + 1) as usize])
             .map_err(Error::Spi)?;
-        self.cs.set_high().map_err(Error::Pin)?;
         let mut reply_iter = buf.iter();
         // Skip first reply byte
         reply_iter.next().unwrap();
@@ -602,7 +585,7 @@ impl<Spi: SpiDevice, Cs: OutputPin> Max116xx10Bit<Spi, Cs, ExtClkd, WithoutWakeu
         buf: &mut [u8],
         result_iter: &mut IterMut<u16>,
         n: u8,
-    ) -> Result<(), Error<Spi::Error, Cs::Error>> {
+    ) -> Result<(), Error<Spi::Error, Infallible>> {
         let mut iter = buf.iter_mut();
         let mut next_byte: &mut u8;
         if n > self.cfg.max_channels - 1 {
@@ -617,11 +600,9 @@ impl<Spi: SpiDevice, Cs: OutputPin> Max116xx10Bit<Spi, Cs, ExtClkd, WithoutWakeu
         }
         next_byte = iter.next().ok_or(Error::Adc(AdcError::CmdBufTooSmall))?;
         *next_byte = 0x00;
-        self.cs.set_low().map_err(Error::Pin)?;
         self.spi
             .transfer_in_place(&mut buf[0..(conversions * 2 + 1) as usize])
             .map_err(Error::Spi)?;
-        self.cs.set_high().map_err(Error::Pin)?;
         let mut reply_iter = buf.iter();
         // Skip first reply byte
         reply_iter.next().unwrap();
@@ -638,13 +619,13 @@ impl<Spi: SpiDevice, Cs: OutputPin> Max116xx10Bit<Spi, Cs, ExtClkd, WithoutWakeu
 
 /// Implementations when using the external SPI clock to time the conversions but also requiring
 /// a wakeup delay
-impl<Spi: SpiDevice, Cs: OutputPin> Max116xx10Bit<Spi, Cs, ExtClkd, WithWakeupDelay> {
+impl<Spi: SpiDevice> Max116xx10Bit<Spi, ExtClkd, WithWakeupDelay> {
     pub fn read_single_channel<Delay: DelayNs>(
         &mut self,
         buf: &mut [u8],
         channel_num: u8,
         delay: &mut Delay,
-    ) -> Result<u16, Error<Spi::Error, Cs::Error>> {
+    ) -> Result<u16, Error<Spi::Error, Infallible>> {
         if buf.len() < 3 {
             return Err(Error::Adc(AdcError::CmdBufTooSmall));
         }
@@ -655,11 +636,9 @@ impl<Spi: SpiDevice, Cs: OutputPin> Max116xx10Bit<Spi, Cs, ExtClkd, WithWakeupDe
         delay.delay_us(65);
         buf[0] = 0x00;
         buf[1] = 0x00;
-        self.cs.set_low().map_err(Error::Pin)?;
         self.spi
             .transfer_in_place(&mut buf[0..2])
             .map_err(Error::Spi)?;
-        self.cs.set_high().map_err(Error::Pin)?;
         Ok(((buf[0] as u16) << 6) | (buf[1] as u16 >> 2))
     }
 
@@ -669,7 +648,7 @@ impl<Spi: SpiDevice, Cs: OutputPin> Max116xx10Bit<Spi, Cs, ExtClkd, WithWakeupDe
         result_iter: &mut IterMut<u16>,
         n: u8,
         delay: &mut Delay,
-    ) -> Result<(), Error<Spi::Error, Cs::Error>> {
+    ) -> Result<(), Error<Spi::Error, Infallible>> {
         let mut iter = buf.iter_mut();
         let mut next_byte: &mut u8;
         for idx in 0..n + 1 {
@@ -684,11 +663,9 @@ impl<Spi: SpiDevice, Cs: OutputPin> Max116xx10Bit<Spi, Cs, ExtClkd, WithWakeupDe
         self.send_wrapper(buf[0])?;
         delay.delay_us(65);
 
-        self.cs.set_low().map_err(Error::Pin)?;
         self.spi
             .transfer_in_place(&mut buf[1..((n + 1) * 2 + 1) as usize])
             .map_err(Error::Spi)?;
-        self.cs.set_high().map_err(Error::Pin)?;
         let mut reply_iter = buf.iter();
         for _ in 0..n + 1 {
             let next_res = result_iter
@@ -706,7 +683,7 @@ impl<Spi: SpiDevice, Cs: OutputPin> Max116xx10Bit<Spi, Cs, ExtClkd, WithWakeupDe
         result_iter: &mut IterMut<u16>,
         n: u8,
         delay: &mut Delay,
-    ) -> Result<(), Error<Spi::Error, Cs::Error>> {
+    ) -> Result<(), Error<Spi::Error, Infallible>> {
         let mut iter = buf.iter_mut();
         let mut next_byte: &mut u8;
         if n > self.cfg.max_channels - 1 {
@@ -725,11 +702,9 @@ impl<Spi: SpiDevice, Cs: OutputPin> Max116xx10Bit<Spi, Cs, ExtClkd, WithWakeupDe
         // reference to power up
         self.send_wrapper(buf[0])?;
         delay.delay_us(65);
-        self.cs.set_low().map_err(Error::Pin)?;
         self.spi
             .transfer_in_place(&mut buf[1..(conversions * 2 + 1) as usize])
             .map_err(Error::Spi)?;
-        self.cs.set_high().map_err(Error::Pin)?;
         let mut reply_iter = buf.iter();
         for _ in 0..conversions {
             let next_res = result_iter
@@ -748,15 +723,13 @@ impl<Spi: SpiDevice, Cs: OutputPin> Max116xx10Bit<Spi, Cs, ExtClkd, WithWakeupDe
 
 /// Implementations when using the internal clock with a conversion started
 /// through the serial interface
-impl<Spi: SpiDevice, Cs: OutputPin<Error = PinE>, Eoc: InputPin<Error = PinE>, PinE>
-    Max116xx10BitEocExt<Spi, Cs, Eoc, IntClkdIntTmdSerIF>
-{
+impl<Spi: SpiDevice, Eoc: InputPin> Max116xx10BitEocExt<Spi, Eoc, IntClkdIntTmdSerIF> {
     #[inline]
     fn request_wrapper(
         &mut self,
         channel_num: u8,
         scan_mode: ScanMode,
-    ) -> Result<(), Error<Spi::Error, Cs::Error>> {
+    ) -> Result<(), Error<Spi::Error, Infallible>> {
         if self.base.cfg.pending_scan_mode.is_some() {
             return Err(Error::Adc(AdcError::PendingOperation));
         }
@@ -764,7 +737,7 @@ impl<Spi: SpiDevice, Cs: OutputPin<Error = PinE>, Eoc: InputPin<Error = PinE>, P
             .base
             .get_conversion_byte(scan_mode, channel_num)
             .map_err(Error::Adc)?;
-        self.base.send_wrapper(conv_byte)?;
+        self.base.send_wrapper(conv_byte).ok();
         self.base.cfg.pending_scan_mode = Some(scan_mode);
         Ok(())
     }
@@ -772,7 +745,7 @@ impl<Spi: SpiDevice, Cs: OutputPin<Error = PinE>, Eoc: InputPin<Error = PinE>, P
     pub fn request_single_channel(
         &mut self,
         channel_num: u8,
-    ) -> Result<(), Error<Spi::Error, PinE>> {
+    ) -> Result<(), Error<Spi::Error, Infallible>> {
         self.request_wrapper(channel_num, ScanMode::ConvertChannelNOnce)
     }
 
@@ -782,14 +755,14 @@ impl<Spi: SpiDevice, Cs: OutputPin<Error = PinE>, Eoc: InputPin<Error = PinE>, P
     pub fn request_channel_n_repeatedly(
         &mut self,
         channel_num: u8,
-    ) -> Result<(), Error<Spi::Error, PinE>> {
+    ) -> Result<(), Error<Spi::Error, Infallible>> {
         self.request_wrapper(channel_num, ScanMode::ScanChannelNRepeatedly)
     }
 
     pub fn request_multiple_channels_0_to_n(
         &mut self,
         n: u8,
-    ) -> Result<(), Error<Spi::Error, PinE>> {
+    ) -> Result<(), Error<Spi::Error, Infallible>> {
         self.base.cfg.requested_conversions = n as usize + 1;
         self.request_wrapper(n, ScanMode::Scan0ToChannelN)
     }
@@ -797,7 +770,7 @@ impl<Spi: SpiDevice, Cs: OutputPin<Error = PinE>, Eoc: InputPin<Error = PinE>, P
     pub fn request_multiple_channels_n_to_highest(
         &mut self,
         n: u8,
-    ) -> Result<(), Error<Spi::Error, PinE>> {
+    ) -> Result<(), Error<Spi::Error, Infallible>> {
         self.base.cfg.requested_conversions = self.base.cfg.max_channels as usize + 1 - n as usize;
         self.request_wrapper(n, ScanMode::ScanChannelNToHighest)
     }
@@ -806,7 +779,7 @@ impl<Spi: SpiDevice, Cs: OutputPin<Error = PinE>, Eoc: InputPin<Error = PinE>, P
     /// needs to be passed explicitely here.
     /// If no request was made, [AdcError::NoPendingOperation] is returned.
     /// If a request was made for multipel results, [AdcError::PendingOperation] will be returned.
-    pub fn get_single_channel(&mut self) -> nb::Result<u16, Error<Spi::Error, Cs::Error>> {
+    pub fn get_single_channel(&mut self) -> nb::Result<u16, Error<Spi::Error, Eoc::Error>> {
         self.base.internal_read_single_channel(&mut self.eoc)
     }
 
@@ -816,7 +789,7 @@ impl<Spi: SpiDevice, Cs: OutputPin<Error = PinE>, Eoc: InputPin<Error = PinE>, P
     pub fn get_multi_channel(
         &mut self,
         result_iter: &mut IterMut<u16>,
-    ) -> nb::Result<(), Error<Spi::Error, Cs::Error>> {
+    ) -> nb::Result<(), Error<Spi::Error, Eoc::Error>> {
         if self.base.cfg.pending_scan_mode.is_none() {
             return Err(nb::Error::Other(Error::Adc(AdcError::NoPendingOperation)));
         } else if self.base.cfg.pending_scan_mode == Some(ScanMode::ConvertChannelNOnce) {
@@ -833,12 +806,10 @@ impl<Spi: SpiDevice, Cs: OutputPin<Error = PinE>, Eoc: InputPin<Error = PinE>, P
                 };
             self.base.cfg.pending_scan_mode = None;
             self.base.cfg.requested_conversions = 0;
-            self.base.cs.set_low().map_err(Error::Pin)?;
             self.base
                 .spi
                 .read(&mut reply_buf[0..(num_conv * 2)])
                 .map_err(Error::Spi)?;
-            self.base.cs.set_high().map_err(Error::Pin)?;
             let mut reply_iter = reply_buf.iter();
             for _ in 0..num_conv {
                 let next_res = result_iter
@@ -863,8 +834,8 @@ impl<Spi: SpiDevice, Cs: OutputPin<Error = PinE>, Eoc: InputPin<Error = PinE>, P
 ///
 /// TODO: Implement. Unfortunately, the test board used to verify this library did not have
 /// the CNVST connected, so I wouldn't be able to test an implementation easily.
-impl<Spi: SpiDevice, Cs: OutputPin, Eoc: InputPin, Cnvst: OutputPin>
-    Max116xx10BitCnvstEocExt<Spi, Cs, Eoc, Cnvst, IntClkdExtTmdCnvst, WithoutWakeupDelay>
+impl<Spi: SpiDevice, Eoc: InputPin, Cnvst: OutputPin>
+    Max116xx10BitCnvstEocExt<Spi, Eoc, Cnvst, IntClkdExtTmdCnvst, WithoutWakeupDelay>
 {
 }
 
@@ -873,13 +844,8 @@ impl<Spi: SpiDevice, Cs: OutputPin, Eoc: InputPin, Cnvst: OutputPin>
 ///
 /// TODO: Test. Unfortunately, the test board used to verify this library did not have
 /// the CNVST connected, so I wouldn't be able to test an implementation easily.
-impl<
-        Spi: SpiDevice,
-        Cs: OutputPin<Error = PinE>,
-        Eoc: InputPin<Error = PinE>,
-        Cnvst: OutputPin<Error = PinE>,
-        PinE,
-    > Max116xx10BitCnvstEocExt<Spi, Cs, Eoc, Cnvst, IntClkdIntTmdCnvst, WithWakeupDelay>
+impl<Spi: SpiDevice, Eoc: InputPin<Error = PinE>, Cnvst: OutputPin<Error = PinE>, PinE>
+    Max116xx10BitCnvstEocExt<Spi, Eoc, Cnvst, IntClkdIntTmdCnvst, WithWakeupDelay>
 {
     /// The pulse needs to be at least 40ns. A pulse cycle value can be used to increase
     /// the width of the pulse
@@ -905,7 +871,7 @@ impl<
             .base
             .get_conversion_byte(scan_mode, channel_num)
             .map_err(Error::Adc)?;
-        self.base.send_wrapper(conv_byte)?;
+        self.base.send_wrapper(conv_byte).ok();
         self.cnvst.set_low().map_err(Error::Pin)?;
         for _ in 0..pulse_cycles {}
         self.cnvst.set_high().map_err(Error::Pin)?;
