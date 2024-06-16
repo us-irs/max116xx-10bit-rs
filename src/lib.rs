@@ -21,6 +21,7 @@
 //! You can find an example application [here](https://egit.irs.uni-stuttgart.de/rust/vorago-reb1/src/branch/main/examples/max11619-adc.rs)
 //! using a [thin abstraction layer](https://egit.irs.uni-stuttgart.de/rust/vorago-reb1/src/branch/main/src/max11619.rs)
 #![no_std]
+#![cfg_attr(docs_rs, feature(doc_auto_cfg))]
 use core::convert::Infallible;
 use core::{marker::PhantomData, slice::IterMut};
 use embedded_hal::delay::DelayNs;
