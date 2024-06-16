@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [unreleased]
 
-## [v0.3.0]
+## [v0.3.0] 2024-06-16
 
 - Update `embedded-hal` to v1.
 - Add optional `defmt` feature.
